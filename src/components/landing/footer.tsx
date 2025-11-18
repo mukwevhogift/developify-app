@@ -26,19 +26,18 @@ export default function Footer() {
               <Link href="#" aria-label="Twitter"><Twitter className="h-5 w-5" /></Link>
             </Button>
             <Button variant="ghost" size="icon" asChild>
-              <Link href="#" aria-label="Email"><Mail className="h-5 w-5" /></Link>
+              <Link href="mailto:support@developify.com" aria-label="Email"><Mail className="h-5 w-5" /></Link>
             </Button>
           </div>
         </div>
 
         <div className="flex flex-col space-y-2 text-sm">
           <h3 className="font-semibold text-white">Quick Links</h3>
-          <Link href="#about" className="text-muted-foreground hover:text-primary">About</Link>
-          <Link href="#features" className="text-muted-foreground hover:text-primary">Features</Link>
-          <Link href="#" className="text-muted-foreground hover:text-primary">Blog</Link>
-          <Link href="#" className="text-muted-foreground hover:text-primary">Contact</Link>
-          <Link href="#" className="text-muted-foreground hover:text-primary">Privacy Policy</Link>
-          <Link href="#" className="text-muted-foreground hover:text-primary">Terms of Service</Link>
+          <Link href="/#about" className="text-muted-foreground hover:text-primary">About</Link>
+          <Link href="/properties" className="text-muted-foreground hover:text-primary">Properties</Link>
+          <Link href="/contact" className="text-muted-foreground hover:text-primary">Contact</Link>
+          <Link href="/privacy" className="text-muted-foreground hover:text-primary">Privacy Policy</Link>
+          <Link href="/terms" className="text-muted-foreground hover:text-primary">Terms of Service</Link>
         </div>
 
         <div className="space-y-4">
