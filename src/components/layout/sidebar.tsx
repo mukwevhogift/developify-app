@@ -9,7 +9,8 @@ import {
   Wallet,
   Sparkles,
   Settings,
-  Rocket
+  Rocket,
+  UserCheck,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -20,17 +21,24 @@ import {
   SidebarMenuButton,
   SidebarFooter,
 } from '@/components/ui/sidebar';
+import { useUser } from '@/firebase';
+import { Skeleton } from '../ui/skeleton';
 
 const navItems = [
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/properties', label: 'Properties', icon: Building2 },
-  { href: '/portfolio', label: 'Portfolio', icon: PieChart },
-  { href: '/wallet', label: 'Wallet', icon: Wallet },
-  { href: '/advisor', label: 'AI Advisor', icon: Sparkles },
+  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['investor'] },
+  { href: '/properties', label: 'Properties', icon: Building2, roles: ['investor'] },
+  { href: '/portfolio', label: 'Portfolio', icon: PieChart, roles: ['investor'] },
+  { href: '/wallet', label: 'Wallet', icon: Wallet, roles: ['investor'] },
+  { href: '/advisor', label: 'AI Advisor', icon: Sparkles, roles: ['investor'] },
+  { href: '/owner-onboarding', label: 'Get Verified', icon: UserCheck, roles: ['property_owner'] },
 ];
 
 export default function AppSidebar() {
   const pathname = usePathname();
+  const { user, isUserLoading } = useUser();
+  const userRole = (user?.stsTokenManager?.claims as { role?: string })?.role;
+
+  const filteredNavItems = navItems.filter(item => userRole && item.roles.includes(userRole));
 
   return (
     <Sidebar>
@@ -46,20 +54,28 @@ export default function AppSidebar() {
       </SidebarHeader>
       <SidebarContent className="flex-1">
         <SidebarMenu>
-          {navItems.map((item) => (
-            <SidebarMenuItem key={item.href}>
-              <SidebarMenuButton
-                asChild
-                isActive={pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href))}
-                tooltip={{ children: item.label, side: 'right' }}
-              >
-                <Link href={item.href}>
-                  <item.icon />
-                  <span>{item.label}</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          ))}
+          {isUserLoading ? (
+            <>
+              <Skeleton className="h-8 w-full" />
+              <Skeleton className="h-8 w-full" />
+              <Skeleton className="h-8 w-full" />
+            </>
+          ) : (
+            filteredNavItems.map((item) => (
+              <SidebarMenuItem key={item.href}>
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href))}
+                  tooltip={{ children: item.label, side: 'right' }}
+                >
+                  <Link href={item.href}>
+                    <item.icon />
+                    <span>{item.label}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            ))
+          )}
         </SidebarMenu>
       </SidebarContent>
       <SidebarFooter className="border-t border-sidebar-border">

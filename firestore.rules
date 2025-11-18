@@ -60,23 +60,39 @@ service cloud.firestore {
       allow delete: if isExistingOwner(userId); // || isAdmin()
     }
 
-        /**
-         * @description Secures documents that mark admin users in the `/roles_admin/{userId}` collection.
-         *              This is a placeholder for future admin role implementation.
-         * @path /roles_admin/{userId}
-         * @allow (get) Allow get admin's document.
-         * @allow (list) Deny listing admin users.
-         * @allow (create) Deny creating admin user directly.
-         * @allow (update) Deny updating admin user directly.
-         * @allow (delete) Deny deleting admin user directly.
-         */
-        match /roles_admin/{userId} {
-            allow get: if false; // No one has access yet
-            allow list: if false; // No one has access yet
+    /**
+      * @description Secures KYC requests in the `/kyc_requests` collection.
+      * @path /kyc_requests/{requestId}
+      * @allow (create) Authenticated users can create KYC requests for themselves.
+      * @deny (read, list, update, delete) All other operations are denied for now.
+    */
+    match /kyc_requests/{requestId} {
+       function isOwner(userId) {
+        return request.auth != null && request.auth.uid == userId;
+      }
 
-            allow create: if false;
-            allow update: if false;
-            allow delete: if false;
-        }
+      allow create: if isOwner(request.resource.data.userId);
+      allow read, list, update, delete: if false; // Future: allow admin to read/update
+    }
+
+
+    /**
+      * @description Secures documents that mark admin users in the `/roles_admin/{userId}` collection.
+      *              This is a placeholder for future admin role implementation.
+      * @path /roles_admin/{userId}
+      * @allow (get) Allow get admin's document.
+      * @allow (list) Deny listing admin users.
+      * @allow (create) Deny creating admin user directly.
+      * @allow (update) Deny updating admin user directly.
+      * @allow (delete) Deny deleting admin user directly.
+      */
+    match /roles_admin/{userId} {
+        allow get: if false; // No one has access yet
+        allow list: if false; // No one has access yet
+
+        allow create: if false;
+        allow update: if false;
+        allow delete: if false;
+    }
   }
 }
