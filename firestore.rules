@@ -1,41 +1,36 @@
 /**
  * @file Firestore Security Rules for Developify
- * @version 5
- * @description This ruleset secures user profiles, property listings, KYC requests, and admin actions.
- * It enforces user ownership, role-based access, and status-based read permissions for properties.
+ * @version 6 (Final)
+ * @description This ruleset secures user profiles, property listings, KYC requests, chats, and admin actions.
+ * It enforces user ownership, role-based access (investor, property_owner, admin), and status-based read permissions for properties.
  */
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    /**
-     * @description Returns true if the requesting user is the owner of the document.
-     * @param userId The UID of the document owner.
-     */
+    // --- Helper Functions ---
+
     function isOwner(userId) {
       return request.auth != null && request.auth.uid == userId;
     }
 
-    /**
-     * @description Returns true if the requesting user is a verified property owner.
-     */
     function isVerifiedOwner() {
       return request.auth != null && request.auth.token.status == 'verified_owner';
     }
 
-    /**
-     * @description Returns true if the requesting user has the 'admin' role claim.
-     */
     function isAdmin() {
       return request.auth != null && request.auth.token.role == 'admin';
     }
 
-    /**
-     * @description Returns true if the requesting user is authenticated.
-     */
     function isAuthenticated() {
         return request.auth != null;
     }
+    
+    function isInvestor() {
+      return request.auth != null && request.auth.token.role == 'investor';
+    }
+    
+    // --- Collection Rules ---
 
     /**
      * @description Secures user profile data.
@@ -46,8 +41,10 @@ service cloud.firestore {
       allow get, update: if isOwner(userId) || isAdmin();
       // A user can create their own profile document.
       allow create: if isOwner(userId) && request.resource.data.uid == userId;
-      // No one can list or delete users for now. Admins can do this via backend functions.
-      allow list, delete: if false; 
+      
+      // Allow admins to list users.
+      allow list: if isAdmin();
+      allow delete: if false; 
     }
 
     /**
@@ -59,7 +56,7 @@ service cloud.firestore {
       allow create: if isOwner(request.resource.data.userId);
       // Admins can read, list, and update (to approve/reject) KYC requests.
       allow read, list, update: if isAdmin();
-      allow delete: if false; // Deletes should be handled carefully, maybe archived instead.
+      allow delete: if false;
     }
 
     /**
@@ -68,7 +65,9 @@ service cloud.firestore {
      */
     match /properties/{propertyId} {
       // ANYONE can read a property that has been approved for public listing.
-      allow get: if resource.data.status == 'approved' || isAdmin() || isOwner(resource.data.ownerId);
+      // Admins and the property owner can also get it regardless of status.
+      allow get: if (resource.data.status == 'approved') || isAdmin() || isOwner(resource.data.ownerId);
+
       // Authenticated users can list approved properties. Admins can list all properties.
       allow list: if isAuthenticated() || isAdmin();
 
@@ -106,12 +105,15 @@ service cloud.firestore {
      * @path /chats/{propertyId}/messages/{messageId}
      */
     match /chats/{propertyId}/messages/{messageId} {
-        // Only authenticated users can read messages.
-        // For enhanced security, you could restrict this to users who have invested or the property owner.
-        allow list, get: if isAuthenticated() || isAdmin();
+        // Anyone who can view the property can read messages.
+        allow list, get: if exists(/databases/$(database)/documents/properties/$(propertyId)) &&
+                           (
+                             (get(/databases/$(database)/documents/properties/$(propertyId)).data.status == 'approved' && isAuthenticated()) ||
+                             isAdmin() ||
+                             isOwner(get(/databases/$(database)/documents/properties/$(propertyId)).data.ownerId)
+                           );
 
         // Only authenticated users can send messages.
-        // The senderId must match the user's UID.
         allow create: if isAuthenticated() && isOwner(request.resource.data.senderId);
 
         // Messages are immutable.
@@ -125,16 +127,8 @@ service cloud.firestore {
     match /admin_actions/{actionId} {
       // Only admins can read the audit log.
       allow get, list: if isAdmin();
-      // Writes are handled by backend functions.
+      // Writes are handled by trusted server-side logic (admin actions).
       allow create, update, delete: if false;
-    }
-
-    /**
-     * @description Placeholder for admin roles.
-     * @path /roles_admin/{userId}
-     */
-    match /roles_admin/{userId} {
-      allow read, write: if false; // No one has access yet
     }
   }
 }
