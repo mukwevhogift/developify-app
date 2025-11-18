@@ -12,7 +12,6 @@ export default function LandingHeader() {
 
   const navItems = [
       { href: '/', label: 'Home' },
-      { href: '/properties', label: 'Properties' },
       { href: '/contact', label: 'Contact' },
   ]
 

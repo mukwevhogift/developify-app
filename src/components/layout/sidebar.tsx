@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -28,7 +29,6 @@ import { useState, useEffect } from 'react';
 const allNavItems = [
   // Investor Nav
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, role: 'investor' },
-  { href: '/properties', label: 'Properties', icon: Building2, role: 'investor' },
   { href: '/portfolio', label: 'Portfolio', icon: PieChart, role: 'investor' },
   { href: '/wallet', label: 'Wallet', icon: Wallet, role: 'investor' },
   { href: '/advisor', label: 'AI Advisor', icon: Sparkles, role: 'investor' },
