@@ -6,10 +6,6 @@
       "type": "object",
       "description": "Represents a user in the Developify application.",
       "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the user. (Primary Key)"
-        },
         "uid": {
           "type": "string",
           "description": "The user's Firebase Authentication UID."
@@ -29,8 +25,8 @@
         },
         "role": {
           "type": "string",
-          "description": "The user's role (investor or property_owner).",
-          "enum": ["investor", "property_owner"]
+          "description": "The user's role (investor, property_owner, or admin).",
+          "enum": ["investor", "property_owner", "admin"]
         },
         "status": {
           "type": "string",
@@ -48,7 +44,6 @@
         }
       },
       "required": [
-        "id",
         "uid",
         "email",
         "role",
@@ -160,6 +155,40 @@
         }
       },
       "required": ["userId", "documentUrls", "status", "submittedAt"]
+    },
+    "AuditLog": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Audit Log",
+      "type": "object",
+      "description": "Records administrative actions taken in the system.",
+      "properties": {
+        "adminId": {
+          "type": "string",
+          "description": "The UID of the admin who performed the action."
+        },
+        "action": {
+          "type": "string",
+          "description": "The type of action performed (e.g., 'approve_kyc', 'reject_property')."
+        },
+        "targetId": {
+          "type": "string",
+          "description": "The ID of the document that was acted upon (e.g., kycRequestId, propertyId)."
+        },
+        "targetUserId": {
+            "type": "string",
+            "description": "The UID of the user who was affected by the action, if applicable."
+        },
+        "reason": {
+            "type": "string",
+            "description": "A reason for the action, if provided (e.g., rejection reason)."
+        },
+        "timestamp": {
+          "type": "string",
+          "description": "Timestamp of when the action occurred.",
+          "format": "date-time"
+        }
+      },
+      "required": ["adminId", "action", "targetId", "timestamp"]
     }
   },
   "auth": {
@@ -198,6 +227,16 @@
             "$ref": "#/entities/KycRequest"
           },
           "description": "Stores KYC verification submissions from property owners."
+        }
+      },
+      {
+        "path": "/admin_actions/{actionId}",
+        "definition": {
+            "entityName": "AuditLog",
+            "schema": {
+                "$ref": "#/entities/AuditLog"
+            },
+            "description": "Stores a log of all actions performed by administrators for auditing purposes."
         }
       }
     ],

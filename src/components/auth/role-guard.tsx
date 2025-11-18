@@ -23,9 +23,17 @@ const RoleGuard = ({ children }: { children: ReactNode }) => {
       router.push('/login');
       return;
     }
+
+    // Admin routes
+    if (role === 'admin' && !pathname.startsWith('/admin')) {
+        router.push('/admin/approvals');
+    }
+    else if (role !== 'admin' && pathname.startsWith('/admin')) {
+        router.push('/dashboard'); // Or some other default page
+    }
     
     // Investor routes
-    if (role === 'investor' && (pathname.startsWith('/owner-onboarding') || pathname.startsWith('/owner'))) {
+    else if (role === 'investor' && (pathname.startsWith('/owner') || pathname.startsWith('/owner-onboarding'))) {
         router.push('/dashboard');
     } 
     // Property Owner routes
@@ -40,7 +48,7 @@ const RoleGuard = ({ children }: { children: ReactNode }) => {
         else if (!isVerified && pathname.startsWith('/owner')) {
             router.push('/owner-onboarding');
         }
-        // If not verified and on investor pages, redirect to onboarding
+        // If not verified and on general investor pages, redirect to onboarding
         else if (!isVerified && !pathname.startsWith('/owner-onboarding') && pathname !== '/settings') {
              router.push('/owner-onboarding');
         }

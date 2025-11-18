@@ -12,6 +12,7 @@ import {
   Rocket,
   UserCheck,
   Building,
+  ShieldCheck,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -34,9 +35,12 @@ const navItems = [
   { href: '/advisor', label: 'AI Advisor', icon: Sparkles, roles: ['investor'] },
   
   // Property Owner Nav
-  { href: '/owner-onboarding', label: 'Get Verified', icon: UserCheck, roles: ['property_owner'], statuses: ['active', 'pending_kyc'] },
+  { href: '/owner-onboarding', label: 'Get Verified', icon: UserCheck, roles: ['property_owner'], statuses: ['active', 'pending_kyc', 'rejected'] },
   { href: '/owner/dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['property_owner'], statuses: ['verified_owner'] },
-  { href: '/owner/properties', label: 'My Properties', icon: Building, roles: ['property_owner'], statuses: ['verified_owner'] },
+  // { href: '/owner/properties', label: 'My Properties', icon: Building, roles: ['property_owner'], statuses: ['verified_owner'] },
+  
+  // Admin Nav
+  { href: '/admin/approvals', label: 'Approvals', icon: ShieldCheck, roles: ['admin'] },
 ];
 
 export default function AppSidebar() {
@@ -51,6 +55,7 @@ export default function AppSidebar() {
     if (!userRole || !item.roles.includes(userRole)) {
       return false;
     }
+    // If an item requires a specific status, check against the user's status.
     if (item.statuses && userStatus && !item.statuses.includes(userStatus)) {
       return false;
     }
