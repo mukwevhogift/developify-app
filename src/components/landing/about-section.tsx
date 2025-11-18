@@ -76,14 +76,15 @@ export default function AboutSection() {
             viewport={{ once: true, amount: 0.3 }}
         >
             <div className="aspect-w-9 aspect-h-16 h-full w-full overflow-hidden rounded-2xl shadow-2xl">
-                <iframe
-                    className="h-full w-full"
-                    src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=0&showinfo=0&controls=0"
-                    title="YouTube video player"
-                    frameBorder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                ></iframe>
+                <video
+                    className="h-full w-full object-cover"
+                    src="/Developify__Investing_Reimagined.mp4"
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    poster="https://via.placeholder.com/1280x720.png?text=Developify%20Explainer"
+                />
             </div>
         </motion.div>
       </div>
