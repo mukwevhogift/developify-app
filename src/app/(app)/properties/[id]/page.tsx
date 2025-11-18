@@ -11,8 +11,10 @@ import { Progress } from "@/components/ui/progress"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Building, DollarSign, Target, TrendingUp } from "lucide-react"
+import { Building, DollarSign, MessageSquare, Target, TrendingUp, Info } from "lucide-react"
 import { VerificationDialog } from "@/components/properties/verification-dialog"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import ChatInterface from "@/components/chat/chat-interface"
 
 export default function PropertyDetailsPage({ params }: { params: { id: string } }) {
   const [isVerificationOpen, setVerificationOpen] = useState(false)
@@ -54,14 +56,32 @@ export default function PropertyDetailsPage({ params }: { params: { id: string }
                 ))}
             </div>
 
-            <Card>
-                <CardHeader>
-                    <CardTitle className="font-headline">Property Description</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <p className="text-muted-foreground">{property.description}</p>
-                </CardContent>
-            </Card>
+            <Tabs defaultValue="description">
+              <TabsList>
+                <TabsTrigger value="description"><Info className="mr-2" />Description</TabsTrigger>
+                <TabsTrigger value="discussion"><MessageSquare className="mr-2" />Discussion</TabsTrigger>
+              </TabsList>
+              <TabsContent value="description" className="mt-4">
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="font-headline">Property Description</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <p className="text-muted-foreground">{property.description}</p>
+                    </CardContent>
+                </Card>
+              </TabsContent>
+              <TabsContent value="discussion" className="mt-4">
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="font-headline">Community Discussion</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ChatInterface propertyId={property.id} />
+                    </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
         </div>
 
         <div className="lg:col-span-1 space-y-8">

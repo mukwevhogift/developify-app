@@ -189,6 +189,33 @@
         }
       },
       "required": ["adminId", "action", "targetId", "timestamp"]
+    },
+    "ChatMessage": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Chat Message",
+      "type": "object",
+      "description": "Represents a single message in a property chat thread.",
+      "properties": {
+        "senderId": {
+          "type": "string",
+          "description": "The UID of the user who sent the message."
+        },
+        "senderRole": {
+          "type": "string",
+          "description": "The role of the sender at the time of sending.",
+          "enum": ["investor", "property_owner", "admin"]
+        },
+        "text": {
+          "type": "string",
+          "description": "The content of the chat message."
+        },
+        "timestamp": {
+          "type": "string",
+          "description": "Timestamp of when the message was sent.",
+          "format": "date-time"
+        }
+      },
+      "required": ["senderId", "senderRole", "text", "timestamp"]
     }
   },
   "auth": {
@@ -238,8 +265,18 @@
             },
             "description": "Stores a log of all actions performed by administrators for auditing purposes."
         }
+      },
+      {
+        "path": "/chats/{propertyId}/messages/{messageId}",
+        "definition": {
+            "entityName": "ChatMessage",
+            "schema": {
+                "$ref": "#/entities/ChatMessage"
+            },
+            "description": "Stores messages for a specific property chat. `propertyId` links to the property."
+        }
       }
     ],
-    "reasoning": "This design prioritizes security and scalability for the Developify application. User data is stored in a dedicated collection (`/users/{userId}`), ensuring path-based ownership. The `properties` collection is secured to allow owners to manage their own listings, while public read access is restricted to 'approved' properties. The `kyc_requests` collection is write-only for users, with admin read/update access handled separately. This structure avoids `get()` calls in rules where possible, improving performance and security."
+    "reasoning": "This design prioritizes security and scalability for the Developify application. User data is stored in a dedicated collection (`/users/{userId}`), ensuring path-based ownership. The `properties` collection is secured to allow owners to manage their own listings, while public read access is restricted to 'approved' properties. The `kyc_requests` collection is write-only for users, with admin read/update access handled separately. The `chats` collection uses subcollections for scalability. This structure avoids `get()` calls in rules where possible, improving performance and security."
   }
 }
