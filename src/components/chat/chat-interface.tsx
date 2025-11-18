@@ -1,31 +1,32 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { useCollection, useFirebase, useMemoFirebase } from '@/firebase';
-import { collection, addDoc, serverTimestamp, query, orderBy } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Loader2, Send } from 'lucide-react';
 import { ScrollArea } from '../ui/scroll-area';
 import { cn } from '@/lib/utils';
-import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+import { Avatar, AvatarFallback } from '../ui/avatar';
 
 interface ChatInterfaceProps {
     propertyId: string;
 }
 
+// Mock messages for UI testing
+const mockMessages = [
+    { id: '1', senderId: 'user-2', senderName: 'Alice', text: 'This property looks interesting. Can you tell me more about the neighborhood?', timestamp: new Date() },
+    { id: '2', senderId: 'user-1', senderName: 'You', text: 'Of course! It\'s a vibrant area with great schools and parks nearby.', timestamp: new Date() },
+    { id: '3', senderId: 'user-3', senderName: 'Bob', text: 'What is the estimated completion date?', timestamp: new Date() },
+];
+
+
 export default function ChatInterface({ propertyId }: ChatInterfaceProps) {
-    const { firestore, user } = useFirebase();
     const [newMessage, setNewMessage] = useState('');
     const [isSending, setIsSending] = useState(false);
     const scrollAreaRef = useRef<HTMLDivElement>(null);
-
-    const messagesQuery = useMemoFirebase(() => {
-        if (!firestore) return null;
-        return query(collection(firestore, `chats/${propertyId}/messages`), orderBy('timestamp', 'asc'));
-    }, [firestore, propertyId]);
-
-    const { data: messages, isLoading } = useCollection(messagesQuery);
+    const [messages, setMessages] = useState(mockMessages);
+    const isLoading = false;
+    const user = { uid: 'user-1', displayName: 'You' }; // Mock user
 
     useEffect(() => {
         if (scrollAreaRef.current) {
@@ -35,30 +36,23 @@ export default function ChatInterface({ propertyId }: ChatInterfaceProps) {
 
     const handleSendMessage = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!firestore || !user || !newMessage.trim()) return;
+        if (!newMessage.trim()) return;
 
         setIsSending(true);
-        const claims = (user?.stsTokenManager?.claims as { role?: string; });
-        const userRole = claims?.role || 'investor';
+        await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network
         
-        try {
-            const messagesCollection = collection(firestore, `chats/${propertyId}/messages`);
-            await addDoc(messagesCollection, {
-                senderId: user.uid,
-                senderName: user.displayName || 'Anonymous',
-                senderRole: userRole,
-                text: newMessage,
-                timestamp: serverTimestamp(),
-            });
-            setNewMessage('');
-        } catch (error) {
-            console.error("Error sending message:", error);
-        } finally {
-            setIsSending(false);
-        }
+        const newMsg = {
+            id: String(messages.length + 1),
+            senderId: user.uid,
+            senderName: user.displayName || 'Anonymous',
+            text: newMessage,
+            timestamp: new Date(),
+        };
+
+        setMessages(prev => [...prev, newMsg]);
+        setNewMessage('');
+        setIsSending(false);
     };
-    
-    const claims = (user?.stsTokenManager?.claims as { role?: string; });
 
     return (
         <div className="flex flex-col h-[500px] border rounded-lg">

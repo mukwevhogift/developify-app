@@ -3,10 +3,7 @@
 import React, { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { useOnboardingForm, useOnboardingRHF } from './onboarding-form-provider';
-import { useFirebase } from '@/firebase/provider';
-import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
 import { UploadCloud, File, X, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -22,7 +19,6 @@ interface UploadedFile {
 export default function Step2_DocumentUpload() {
   const { setCurrentStep, setUploadedFileUrls } = useOnboardingForm();
   const { setValue } = useOnboardingRHF();
-  const { storage, user } = useFirebase();
   const { toast } = useToast();
   const [files, setFiles] = useState<UploadedFile[]>([]);
   const [isUploading, setIsUploading] = useState(false);
@@ -52,10 +48,6 @@ export default function Step2_DocumentUpload() {
   });
 
   const handleUpload = () => {
-    if (!user) {
-      toast({ variant: 'destructive', title: 'Authentication Error', description: 'You must be logged in to upload files.' });
-      return;
-    }
     if (files.some(f => f.progress > 0 && f.progress < 100)) {
         toast({ variant: 'destructive', title: 'Upload in Progress', description: 'Please wait for current uploads to complete.' });
         return;
@@ -64,25 +56,21 @@ export default function Step2_DocumentUpload() {
     setIsUploading(true);
 
     const uploadPromises = files.filter(f => !f.url).map((uploadedFile) => {
-        const storageRef = ref(storage, `kyc_documents/${user.uid}/${Date.now()}_${uploadedFile.file.name}`);
-        const uploadTask = uploadBytesResumable(storageRef, uploadedFile.file);
-
-        return new Promise<string>((resolve, reject) => {
-            uploadTask.on('state_changed',
-            (snapshot) => {
-                const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                setFiles(prev => prev.map(f => f.file === uploadedFile.file ? { ...f, progress } : f));
-            },
-            (error) => {
-                setFiles(prev => prev.map(f => f.file === uploadedFile.file ? { ...f, error: error.message } : f));
-                reject(error);
-            },
-            async () => {
-                const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-                setFiles(prev => prev.map(f => f.file === uploadedFile.file ? { ...f, url: downloadURL, progress: 100 } : f));
-                resolve(downloadURL);
-            }
-            );
+        return new Promise<string>((resolve) => {
+            const interval = setInterval(() => {
+                setFiles(prev => prev.map(f => {
+                    if (f.file === uploadedFile.file) {
+                        const newProgress = f.progress + 20;
+                        if (newProgress >= 100) {
+                            clearInterval(interval);
+                            resolve(`https://mock-url.com/${f.file.name}`);
+                            return { ...f, progress: 100, url: `https://mock-url.com/${f.file.name}` };
+                        }
+                        return { ...f, progress: newProgress };
+                    }
+                    return f;
+                }));
+            }, 200);
         });
     });
 

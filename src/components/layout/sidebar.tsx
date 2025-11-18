@@ -11,7 +11,6 @@ import {
   Settings,
   Rocket,
   UserCheck,
-  Building,
   ShieldCheck,
 } from 'lucide-react';
 import {
@@ -23,44 +22,43 @@ import {
   SidebarMenuButton,
   SidebarFooter,
 } from '@/components/ui/sidebar';
-import { useUser } from '@/firebase';
 import { Skeleton } from '../ui/skeleton';
+import { useState, useEffect } from 'react';
 
-const navItems = [
+const allNavItems = [
   // Investor Nav
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['investor'] },
-  { href: '/properties', label: 'Properties', icon: Building2, roles: ['investor'] },
-  { href: '/portfolio', label: 'Portfolio', icon: PieChart, roles: ['investor'] },
-  { href: '/wallet', label: 'Wallet', icon: Wallet, roles: ['investor'] },
-  { href: '/advisor', label: 'AI Advisor', icon: Sparkles, roles: ['investor'] },
+  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, role: 'investor' },
+  { href: '/properties', label: 'Properties', icon: Building2, role: 'investor' },
+  { href: '/portfolio', label: 'Portfolio', icon: PieChart, role: 'investor' },
+  { href: '/wallet', label: 'Wallet', icon: Wallet, role: 'investor' },
+  { href: '/advisor', label: 'AI Advisor', icon: Sparkles, role: 'investor' },
   
   // Property Owner Nav
-  { href: '/owner-onboarding', label: 'Get Verified', icon: UserCheck, roles: ['property_owner'], statuses: ['active', 'pending_kyc', 'rejected'] },
-  { href: '/owner/dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['property_owner'], statuses: ['verified_owner'] },
-  // { href: '/owner/properties', label: 'My Properties', icon: Building, roles: ['property_owner'], statuses: ['verified_owner'] },
+  { href: '/owner-onboarding', label: 'Get Verified', icon: UserCheck, role: 'property_owner' },
+  { href: '/owner/dashboard', label: 'Dashboard', icon: LayoutDashboard, role: 'property_owner' },
   
   // Admin Nav
-  { href: '/admin/approvals', label: 'Approvals', icon: ShieldCheck, roles: ['admin'] },
+  { href: '/admin/approvals', label: 'Approvals', icon: ShieldCheck, role: 'admin' },
 ];
 
 export default function AppSidebar() {
   const pathname = usePathname();
-  const { user, isUserLoading } = useUser();
-  
-  const claims = (user?.stsTokenManager?.claims as { role?: string; status?: string });
-  const userRole = claims?.role;
-  const userStatus = claims?.status;
+  const [currentRole, setCurrentRole] = useState('investor'); // Default role
+  const [isLoading, setIsLoading] = useState(true);
 
-  const filteredNavItems = navItems.filter(item => {
-    if (!userRole || !item.roles.includes(userRole)) {
-      return false;
+  useEffect(() => {
+    // Determine role from URL path for mock navigation
+    if (pathname.startsWith('/owner')) {
+      setCurrentRole('property_owner');
+    } else if (pathname.startsWith('/admin')) {
+      setCurrentRole('admin');
+    } else {
+      setCurrentRole('investor');
     }
-    // If an item requires a specific status, check against the user's status.
-    if (item.statuses && userStatus && !item.statuses.includes(userStatus)) {
-      return false;
-    }
-    return true;
-  });
+    setIsLoading(false);
+  }, [pathname]);
+
+  const filteredNavItems = allNavItems.filter(item => item.role === currentRole);
 
   return (
     <Sidebar>
@@ -76,7 +74,7 @@ export default function AppSidebar() {
       </SidebarHeader>
       <SidebarContent className="flex-1">
         <SidebarMenu>
-          {isUserLoading ? (
+          {isLoading ? (
             <>
               <Skeleton className="h-8 w-full" />
               <Skeleton className="h-8 w-full" />

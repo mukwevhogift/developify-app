@@ -1,46 +1,52 @@
 'use client'
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { useCollection, useFirebase, useMemoFirebase } from "@/firebase"
-import { collection } from "firebase/firestore"
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
 import { Loader2 } from "lucide-react"
+import { useMemo } from "react"
 
 const COLORS = ['#63B5FF', '#88D1FF', '#AEE7FF'];
 
+// Mock data since we are not connected to a backend
+const mockUsers = [
+    { role: 'investor' }, { role: 'investor' }, { role: 'investor' },
+    { role: 'property_owner' }, { role: 'property_owner' },
+    { role: 'admin' },
+];
+
+const mockProperties = [
+    { status: 'approved', raisedAmount: 50000 },
+    { status: 'pending', raisedAmount: 10000 },
+    { status: 'approved', raisedAmount: 75000 },
+    { status: 'draft', raisedAmount: 0 },
+    { status: 'rejected', raisedAmount: 0 },
+];
+
 export default function AdminOverview() {
-    const { firestore } = useFirebase();
+    const usersLoading = false;
+    const propertiesLoading = false;
 
-    const usersQuery = useMemoFirebase(() => firestore ? collection(firestore, 'users') : null, [firestore]);
-    const { data: users, isLoading: usersLoading } = useCollection(usersQuery);
-    
-    const propertiesQuery = useMemoFirebase(() => firestore ? collection(firestore, 'properties') : null, [firestore]);
-    const { data: properties, isLoading: propertiesLoading } = useCollection(propertiesQuery);
-
-    const userRoleData = useMemoFirebase(() => {
-        if (!users) return [];
-        const roles = users.reduce((acc, user) => {
+    const userRoleData = useMemo(() => {
+        const roles = mockUsers.reduce((acc, user) => {
             const role = user.role || 'investor';
             acc[role] = (acc[role] || 0) + 1;
             return acc;
         }, {} as Record<string, number>);
         return Object.entries(roles).map(([name, value]) => ({ name, value }));
-    }, [users]);
+    }, []);
     
-    const propertyStatusData = useMemoFirebase(() => {
-        if (!properties) return [];
-        const statuses = properties.reduce((acc, prop) => {
+    const propertyStatusData = useMemo(() => {
+        const statuses = mockProperties.reduce((acc, prop) => {
             const status = prop.status || 'draft';
             acc[status] = (acc[status] || 0) + 1;
             return acc;
         }, {} as Record<string, number>);
         return Object.entries(statuses).map(([name, value]) => ({ name, value }));
-    }, [properties]);
+    }, []);
 
-    const totalFunding = useMemoFirebase(() => {
-        if (!properties) return 0;
-        return properties.reduce((acc, prop) => acc + (prop.raisedAmount || 0), 0);
-    }, [properties]);
+    const totalFunding = useMemo(() => {
+        return mockProperties.reduce((acc, prop) => acc + (prop.raisedAmount || 0), 0);
+    }, []);
     
     const isLoading = usersLoading || propertiesLoading;
 

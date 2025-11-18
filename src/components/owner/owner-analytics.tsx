@@ -20,8 +20,8 @@ export default function OwnerAnalytics({ properties, isLoading }: { properties: 
     const fundingData = useMemo(() => {
         if (!properties) return [];
         return properties.map(p => ({
-            name: p.title.substring(0, 15) + (p.title.length > 15 ? '...' : ''),
-            raised: p.raisedAmount,
+            name: p.name.substring(0, 15) + (p.name.length > 15 ? '...' : ''),
+            raised: p.currentAmount,
             target: p.targetAmount,
         }));
     }, [properties]);
@@ -29,7 +29,7 @@ export default function OwnerAnalytics({ properties, isLoading }: { properties: 
     const investorData = useMemo(() => {
         if(!properties) return [];
         // @ts-ignore
-        return properties.map(p => ({ name: p.title, value: mockInvestors[p.id] || 0 }))
+        return properties.map(p => ({ name: p.name, value: mockInvestors[p.id] || 0 }))
             .filter(p => p.value > 0);
     }, [properties]);
 

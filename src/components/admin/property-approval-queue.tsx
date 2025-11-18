@@ -1,12 +1,9 @@
 'use client'
 
-import { useCollection, useFirebase, useMemoFirebase } from "@/firebase"
-import { collection, query, where } from "firebase/firestore"
 import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
 import { useState } from "react"
-import { handlePropertyRequest } from "@/firebase/server-actions/admin-actions"
 import { Loader2 } from "lucide-react"
 import {
   AlertDialog,
@@ -20,24 +17,21 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Textarea } from "../ui/textarea"
+import { properties as allProperties } from "@/lib/data"
+
+const mockPendingProperties = allProperties.map(p => ({...p, status: 'pending'})).slice(0, 2);
 
 export default function PropertyApprovalQueue() {
-    const { firestore } = useFirebase();
     const { toast } = useToast();
     const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>({});
     const [rejectionReason, setRejectionReason] = useState('');
-
-    const propertiesQuery = useMemoFirebase(() => {
-        if (!firestore) return null;
-        return query(collection(firestore, 'properties'), where('status', '==', 'pending'));
-    }, [firestore]);
-
-    const { data: properties, isLoading } = useCollection(propertiesQuery);
+    const [properties, setProperties] = useState(mockPendingProperties);
 
     const onAction = async (propertyId: string, action: 'approve' | 'reject', reason?: string) => {
         setLoadingStates(prev => ({ ...prev, [propertyId]: true }));
+        await new Promise(resolve => setTimeout(resolve, 1000));
         try {
-            await handlePropertyRequest(propertyId, action, reason);
+            setProperties(prev => prev.filter(p => p.id !== propertyId));
             toast({
                 title: 'Success',
                 description: `Property has been ${action === 'approve' ? 'approved' : 'rejected'}.`,
@@ -54,11 +48,7 @@ export default function PropertyApprovalQueue() {
         }
     }
 
-    if (isLoading) {
-        return <p>Loading properties...</p>
-    }
-
-    if (!properties || properties.length === 0) {
+    if (properties.length === 0) {
         return (
             <div className="text-center py-12 border rounded-lg">
                 <h3 className="text-lg font-semibold">No Pending Properties</h3>
@@ -72,7 +62,7 @@ export default function PropertyApprovalQueue() {
             {properties.map(property => (
                 <Card key={property.id}>
                     <CardHeader>
-                        <CardTitle>{property.title}</CardTitle>
+                        <CardTitle>{property.name}</CardTitle>
                         <CardDescription>{property.location}</CardDescription>
                     </CardHeader>
                     <CardContent>

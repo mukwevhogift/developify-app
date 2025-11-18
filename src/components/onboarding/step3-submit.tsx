@@ -1,10 +1,6 @@
 'use client';
 
 import { useOnboardingForm, useOnboardingRHF } from './onboarding-form-provider';
-import { useFirebase } from '@/firebase/provider';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { updateDocumentNonBlocking } from '@/firebase/non-blocking-updates';
-import { doc } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
@@ -14,36 +10,20 @@ import { useRouter } from 'next/navigation';
 
 export default function Step3_Submit() {
   const { setCurrentStep, formData, uploadedFileUrls } = useOnboardingForm();
-  const { getValues } = useOnboardingRHF();
-  const { firestore, user } = useFirebase();
   const { toast } = useToast();
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   const handleSubmit = async () => {
-    if (!user || !firestore) {
-      toast({ variant: 'destructive', title: 'Error', description: 'User not authenticated or Firestore not available.' });
-      return;
-    }
     setIsSubmitting(true);
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1500));
     try {
-      // 1. Create KYC request
-      const kycData = {
-        userId: user.uid,
+      console.log('Submitting KYC data:', {
+        ...formData,
         documentUrls: uploadedFileUrls,
-        status: 'pending',
-        submittedAt: serverTimestamp(),
-        ...getValues(), // includes personal info
-      };
-      await addDoc(collection(firestore, 'kyc_requests'), kycData);
-
-      // 2. Update user status
-      const userRef = doc(firestore, 'users', user.uid);
-      updateDocumentNonBlocking(userRef, { status: 'pending_kyc' });
-
-      // In a real app, you would trigger a notification to the admin here.
-      // e.g., via a Cloud Function listening to `kyc_requests` creations.
+      });
       
       setIsSubmitted(true);
       toast({ title: 'Application Submitted', description: 'Your verification request has been sent to our team.' });
@@ -64,7 +44,7 @@ export default function Step3_Submit() {
                 Your application is now under review. We will notify you once the process is complete.
                 This can take up to 2-3 business days.
             </p>
-            <Button onClick={() => router.push('/dashboard')}>Back to Dashboard</Button>
+            <Button onClick={() => router.push('/owner/dashboard')}>Back to Dashboard</Button>
         </div>
       );
   }

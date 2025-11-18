@@ -7,8 +7,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import Link from "next/link"
 import { Rocket } from "lucide-react"
 
@@ -23,23 +21,21 @@ export default function LoginPage() {
           <CardTitle className="font-headline text-2xl">Developify</CardTitle>
         </Link>
         <CardDescription>
-          Enter your credentials to access your account.
+          Sign in to your account to continue.
         </CardDescription>
       </CardHeader>
-      <CardContent className="grid gap-4">
-        <div className="grid gap-2">
-          <Label htmlFor="email">Email</Label>
-          <Input id="email" type="email" placeholder="m@example.com" required />
-        </div>
-        <div className="grid gap-2">
-          <Label htmlFor="password">Password</Label>
-          <Input id="password" type="password" required />
-        </div>
+      <CardContent className="flex flex-col gap-4">
+        <Button asChild className="w-full font-bold">
+            <Link href="/dashboard">Sign In as Investor</Link>
+        </Button>
+        <Button asChild className="w-full font-bold" variant="secondary">
+            <Link href="/owner-onboarding">Sign In as Property Owner</Link>
+        </Button>
+        <Button asChild className="w-full font-bold" variant="outline">
+            <Link href="/admin/approvals">Sign In as Admin</Link>
+        </Button>
       </CardContent>
       <CardFooter className="flex flex-col gap-4">
-        <Button asChild className="w-full font-bold">
-            <Link href="/dashboard">Sign In</Link>
-        </Button>
         <div className="text-center text-sm text-muted-foreground">
           Don&apos;t have an account?{" "}
           <Link href="/register" className="font-medium text-primary hover:underline">
