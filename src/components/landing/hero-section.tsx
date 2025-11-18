@@ -19,7 +19,7 @@ export default function HeroSection() {
             className="font-headline text-4xl font-bold tracking-tighter text-white sm:text-5xl md:text-6xl lg:text-7xl"
           >
             Invest in Tomorrow's Properties Today
-          </motion.motion.h1>
+          </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
