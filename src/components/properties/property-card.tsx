@@ -53,7 +53,7 @@ export function PropertyCard({ property }: { property: Property }) {
           </div>
           <Progress value={fundingPercentage} className="h-2" />
           <div className="mt-1 text-right text-xs text-muted-foreground">
-            Target: ${property.targetAmount.toLocaleString()}
+            Target: R{property.targetAmount.toLocaleString()}
           </div>
         </div>
       </CardContent>
