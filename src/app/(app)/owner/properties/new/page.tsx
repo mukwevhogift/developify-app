@@ -12,12 +12,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { useFirebase } from '@/firebase';
-import { addDocumentNonBlocking } from '@/firebase';
-import { collection, serverTimestamp } from 'firebase/firestore';
+import { useAuth } from '@/contexts/auth-context';
 import { Loader2 } from 'lucide-react';
-// We'll need an image uploader component later
-// import ImageUploader from '@/components/properties/image-uploader';
 
 const propertyFormSchema = z.object({
   title: z.string().min(5, 'Title must be at least 5 characters'),
@@ -27,7 +23,6 @@ const propertyFormSchema = z.object({
     (a) => parseFloat(z.string().parse(a)),
     z.number().positive('Target amount must be positive')
   ),
-  // images: z.array(z.string().url()).min(1, 'At least one image is required'),
 });
 
 type PropertyFormData = z.infer<typeof propertyFormSchema>;
@@ -35,7 +30,7 @@ type PropertyFormData = z.infer<typeof propertyFormSchema>;
 export default function NewPropertyPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const { firestore, user } = useFirebase();
+  const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<PropertyFormData>({
@@ -45,12 +40,11 @@ export default function NewPropertyPage() {
       description: '',
       location: '',
       targetAmount: 0,
-      // images: [],
     },
   });
 
   const onSubmit = async (data: PropertyFormData) => {
-    if (!firestore || !user) {
+    if (!user) {
       toast({ variant: 'destructive', title: 'Error', description: 'Not authenticated.' });
       return;
     }
@@ -62,13 +56,15 @@ export default function NewPropertyPage() {
         ownerId: user.uid,
         raisedAmount: 0,
         status: 'draft' as const,
-        images: [], // Placeholder for now
-        documents: [], // Placeholder for now
-        createdAt: serverTimestamp(),
+        images: [],
+        documents: [], 
+        createdAt: new Date().toISOString(),
       };
       
-      const propertiesCollection = collection(firestore, 'properties');
-      await addDocumentNonBlocking(propertiesCollection, newProperty);
+      console.log('Creating new property:', newProperty);
+      // Mock API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
 
       toast({
         title: 'Property Draft Saved!',
@@ -150,11 +146,6 @@ export default function NewPropertyPage() {
                   </FormItem>
                 )}
               />
-              {/* <div>
-                <FormLabel>Images</FormLabel>
-                <ImageUploader />
-                <FormMessage>{form.formState.errors.images?.message}</FormMessage>
-              </div> */}
             </CardContent>
           </Card>
           

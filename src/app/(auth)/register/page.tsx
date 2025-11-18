@@ -1,3 +1,4 @@
+'use client';
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -18,8 +19,24 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { useAuth } from "@/contexts/auth-context";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export default function RegisterPage() {
+    const { login } = useAuth();
+    const router = useRouter();
+    const [role, setRole] = useState<'investor' | 'owner'>('investor');
+
+    const handleRegister = () => {
+        login(role);
+        if (role === 'investor') {
+            router.push('/dashboard');
+        } else {
+            router.push('/owner-onboarding');
+        }
+    }
+
   return (
     <Card className="w-full max-w-sm border-2 border-primary/20 shadow-lg shadow-primary/10">
       <CardHeader className="items-center text-center">
@@ -48,20 +65,20 @@ export default function RegisterPage() {
         </div>
         <div className="grid gap-2">
             <Label htmlFor="role">I am a...</Label>
-            <Select defaultValue="investor">
+            <Select value={role} onValueChange={(value) => setRole(value as 'investor' | 'owner')}>
                 <SelectTrigger id="role">
                     <SelectValue placeholder="Select a role" />
                 </SelectTrigger>
                 <SelectContent>
                     <SelectItem value="investor">Investor</SelectItem>
-                    <SelectItem value="property_owner">Property Owner</SelectItem>
+                    <SelectItem value="owner">Property Owner</SelectItem>
                 </SelectContent>
             </Select>
         </div>
       </CardContent>
       <CardFooter className="flex flex-col gap-4">
-        <Button asChild className="w-full font-bold">
-          <Link href="/dashboard">Create Account</Link>
+        <Button onClick={handleRegister} className="w-full font-bold">
+          Create Account
         </Button>
         <div className="text-center text-sm text-muted-foreground">
           Already have an account?{" "}

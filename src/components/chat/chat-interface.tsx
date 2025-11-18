@@ -7,6 +7,7 @@ import { Loader2, Send } from 'lucide-react';
 import { ScrollArea } from '../ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback } from '../ui/avatar';
+import { useAuth } from '@/contexts/auth-context';
 
 interface ChatInterfaceProps {
     propertyId: string;
@@ -25,8 +26,8 @@ export default function ChatInterface({ propertyId }: ChatInterfaceProps) {
     const [isSending, setIsSending] = useState(false);
     const scrollAreaRef = useRef<HTMLDivElement>(null);
     const [messages, setMessages] = useState(mockMessages);
-    const isLoading = false;
-    const user = { uid: 'user-1', displayName: 'You' }; // Mock user
+    const { user } = useAuth();
+    const isLoading = !user;
 
     useEffect(() => {
         if (scrollAreaRef.current) {
@@ -36,7 +37,7 @@ export default function ChatInterface({ propertyId }: ChatInterfaceProps) {
 
     const handleSendMessage = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!newMessage.trim()) return;
+        if (!newMessage.trim() || !user) return;
 
         setIsSending(true);
         await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network

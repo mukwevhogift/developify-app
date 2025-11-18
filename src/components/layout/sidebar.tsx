@@ -25,6 +25,7 @@ import {
 } from '@/components/ui/sidebar';
 import { Skeleton } from '../ui/skeleton';
 import { useState, useEffect } from 'react';
+import { useAuth } from '@/contexts/auth-context';
 
 const allNavItems = [
   // Investor Nav
@@ -34,8 +35,8 @@ const allNavItems = [
   { href: '/advisor', label: 'AI Advisor', icon: Sparkles, role: 'investor' },
   
   // Property Owner Nav
-  { href: '/owner-onboarding', label: 'Get Verified', icon: UserCheck, role: 'property_owner' },
-  { href: '/owner/dashboard', label: 'Dashboard', icon: LayoutDashboard, role: 'property_owner' },
+  { href: '/owner-onboarding', label: 'Get Verified', icon: UserCheck, role: 'owner' },
+  { href: '/owner/dashboard', label: 'Dashboard', icon: LayoutDashboard, role: 'owner' },
   
   // Admin Nav
   { href: '/admin/approvals', label: 'Approvals', icon: ShieldCheck, role: 'admin' },
@@ -43,20 +44,9 @@ const allNavItems = [
 
 export default function AppSidebar() {
   const pathname = usePathname();
-  const [currentRole, setCurrentRole] = useState('investor'); // Default role
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    // Determine role from URL path for mock navigation
-    if (pathname.startsWith('/owner')) {
-      setCurrentRole('property_owner');
-    } else if (pathname.startsWith('/admin')) {
-      setCurrentRole('admin');
-    } else {
-      setCurrentRole('investor');
-    }
-    setIsLoading(false);
-  }, [pathname]);
+  const { user, isLoading } = useAuth();
+  
+  const currentRole = user?.role;
 
   const filteredNavItems = allNavItems.filter(item => item.role === currentRole);
 

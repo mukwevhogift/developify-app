@@ -1,3 +1,5 @@
+'use client';
+
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -9,8 +11,21 @@ import {
 } from "@/components/ui/card"
 import Link from "next/link"
 import { Rocket } from "lucide-react"
+import { useAuth } from "@/contexts/auth-context";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
+  const { login } = useAuth();
+  const router = useRouter();
+
+  const handleLogin = (role: 'investor' | 'owner' | 'admin') => {
+    login(role);
+    if (role === 'investor') router.push('/dashboard');
+    if (role === 'owner') router.push('/owner/dashboard');
+    if (role === 'admin') router.push('/admin/approvals');
+  }
+
+
   return (
     <Card className="w-full max-w-sm border-2 border-primary/20 shadow-lg shadow-primary/10">
       <CardHeader className="items-center text-center">
@@ -25,14 +40,14 @@ export default function LoginPage() {
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
-        <Button asChild className="w-full font-bold">
-            <Link href="/dashboard">Sign In as Investor</Link>
+        <Button onClick={() => handleLogin('investor')} className="w-full font-bold">
+            Sign In as Investor
         </Button>
-        <Button asChild className="w-full font-bold" variant="secondary">
-            <Link href="/owner-onboarding">Sign In as Property Owner</Link>
+        <Button onClick={() => handleLogin('owner')} className="w-full font-bold" variant="secondary">
+           Sign In as Property Owner
         </Button>
-        <Button asChild className="w-full font-bold" variant="outline">
-            <Link href="/admin/approvals">Sign In as Admin</Link>
+        <Button onClick={() => handleLogin('admin')} className="w-full font-bold" variant="outline">
+            Sign In as Admin
         </Button>
       </CardContent>
       <CardFooter className="flex flex-col gap-4">

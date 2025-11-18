@@ -3,6 +3,7 @@ import Header from '@/components/layout/header';
 import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
 import { Suspense } from 'react';
 import { Loader2 } from 'lucide-react';
+import { AuthProvider } from '@/contexts/auth-context';
 
 export default function AppLayout({
   children,
@@ -10,6 +11,7 @@ export default function AppLayout({
   children: React.ReactNode;
 }) {
   return (
+    <AuthProvider>
       <SidebarProvider>
         <AppSidebar />
         <SidebarInset>
@@ -23,5 +25,6 @@ export default function AppLayout({
             </div>
         </SidebarInset>
       </SidebarProvider>
+    </AuthProvider>
   );
 }
