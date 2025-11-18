@@ -11,6 +11,13 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import Link from "next/link"
 import { Rocket } from "lucide-react"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 export default function RegisterPage() {
   return (
@@ -38,6 +45,18 @@ export default function RegisterPage() {
         <div className="grid gap-2">
           <Label htmlFor="password">Password</Label>
           <Input id="password" type="password" required />
+        </div>
+        <div className="grid gap-2">
+            <Label htmlFor="role">I am a...</Label>
+            <Select defaultValue="investor">
+                <SelectTrigger id="role">
+                    <SelectValue placeholder="Select a role" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="investor">Investor</SelectItem>
+                    <SelectItem value="property_owner">Property Owner</SelectItem>
+                </SelectContent>
+            </Select>
         </div>
       </CardContent>
       <CardFooter className="flex flex-col gap-4">

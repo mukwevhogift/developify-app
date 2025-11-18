@@ -45,14 +45,19 @@ service cloud.firestore {
         return isOwner(userId) && resource != null;
       }
 
-      allow get: if isOwner(userId);
-      allow list: if false; // Listing users is not permitted.
+      // Future admin access rule:
+      // function isAdmin() {
+      //   return exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
+      // }
+
+      allow get: if isOwner(userId); // || isAdmin()
+      allow list: if false; // Listing users is not permitted for now. Could be admin-only.
 
       allow create: if isOwner(userId) && request.resource.data.uid == userId && request.resource.data.id == userId;
 
-      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
+      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id; // || isAdmin()
 
-      allow delete: if isExistingOwner(userId);
+      allow delete: if isExistingOwner(userId); // || isAdmin()
     }
 
         /**
