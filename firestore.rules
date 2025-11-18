@@ -1,0 +1,77 @@
+/**
+ * @file Firestore Security Rules for Developify (Prototyping Phase 1)
+ *
+ * @corePhilosophy: This ruleset enforces a strict user-ownership model for user profiles,
+ *                   allowing users to only read and write their own data. This design simplifies
+ *                   the rules and improves security.
+ *
+ * @dataStructure: User profiles are stored in the `/users/{userId}` collection, where `{userId}`
+ *                  corresponds to the Firebase Authentication UID of the user.
+ *
+ * @keySecurityDecisions:
+ *   - Users can only access their own documents. Listing all users is disallowed.
+ *   - An admin role is reserved for the future and managed separately, but is not active in this prototype.
+ *   - Data shape is not strictly enforced to allow for rapid prototyping. Only fields critical for authorization
+ *     (like 'uid' and 'id') are validated.
+ *
+ * @denormalizationForAuthorization:
+ *   - The `User` document stores the `uid` field, which is a duplicate of the `userId` path parameter. This
+ *     denormalization allows the rules to quickly verify user ownership without additional `get()` calls.
+ *
+ * @structuralSegregation:
+ *   - No public/private data segregation is implemented in this prototype. All user data is considered private
+ *     and stored under the `/users/{userId}` path.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * @description Secures user profile data in the `/users/{userId}` collection.
+     *              Allows users to read and write their own profile data.
+     * @path /users/{userId}
+     * @allow (create) User with UID "user_abc" can create a document at `/users/user_abc` with matching `uid` and `id` fields.
+     * @allow (get, update, delete) User with UID "user_abc" can get, update, or delete their own document at `/users/user_abc`.
+     * @deny (create) User with UID "user_abc" cannot create a document at `/users/user_xyz`.
+     * @deny (get, update, delete) User with UID "user_xyz" cannot get, update, or delete the document at `/users/user_abc`.
+     * @principle Enforces document ownership for reads and writes. Validates relational integrity between the path and document data.
+     */
+    match /users/{userId} {
+      function isOwner(userId) {
+        return request.auth != null && request.auth.uid == userId;
+      }
+
+      function isExistingOwner(userId) {
+        return isOwner(userId) && resource != null;
+      }
+
+      allow get: if isOwner(userId);
+      allow list: if false; // Listing users is not permitted.
+
+      allow create: if isOwner(userId) && request.resource.data.uid == userId && request.resource.data.id == userId;
+
+      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
+
+      allow delete: if isExistingOwner(userId);
+    }
+
+        /**
+         * @description Secures documents that mark admin users in the `/roles_admin/{userId}` collection.
+         *              This is a placeholder for future admin role implementation.
+         * @path /roles_admin/{userId}
+         * @allow (get) Allow get admin's document.
+         * @allow (list) Deny listing admin users.
+         * @allow (create) Deny creating admin user directly.
+         * @allow (update) Deny updating admin user directly.
+         * @allow (delete) Deny deleting admin user directly.
+         */
+        match /roles_admin/{userId} {
+            allow get: if false; // No one has access yet
+            allow list: if false; // No one has access yet
+
+            allow create: if false;
+            allow update: if false;
+            allow delete: if false;
+        }
+  }
+}

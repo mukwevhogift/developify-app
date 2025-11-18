@@ -1,0 +1,102 @@
+{
+  "entities": {
+    "User": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "User",
+      "type": "object",
+      "description": "Represents a user in the Developify application.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the user. (Primary Key)"
+        },
+        "uid": {
+          "type": "string",
+          "description": "The user's Firebase Authentication UID."
+        },
+        "email": {
+          "type": "string",
+          "description": "The user's email address.",
+          "format": "email"
+        },
+        "phone": {
+          "type": "string",
+          "description": "The user's phone number."
+        },
+        "displayName": {
+          "type": "string",
+          "description": "The user's display name."
+        },
+        "role": {
+          "type": "string",
+          "description": "The user's role (investor or property_owner)."
+        },
+        "status": {
+          "type": "string",
+          "description": "The user's account status (active or pending)."
+        },
+        "kycVerified": {
+          "type": "boolean",
+          "description": "Indicates if the user's KYC is verified."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp of when the user account was created.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "uid",
+        "email",
+        "role",
+        "status",
+        "kycVerified",
+        "createdAt"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Stores user profile information.  Includes 'uid' to enforce path-based ownership. The 'userId' parameter must match the authenticated user's UID.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The Firebase Authentication UID of the user."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/roles_admin/{userId}",
+        "definition": {
+          "entityName": "role_admin",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Marks the document of an admin user. The existence of this document grants admin privileges.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The Firebase Authentication UID of the admin user."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "This design prioritizes security and scalability for the Developify application. User data is stored in a dedicated collection (`/users/{userId}`), ensuring path-based ownership and straightforward security rules.  The `users` collection stores user profile information.  This approach simplifies security rules, allowing users to only read/write their own documents. This structure avoids any `get()` calls in rules, improving performance and security. This setup directly supports the QAP for user data by isolating it within the `/users/{userId}` path, preventing unauthorized access to other user profiles. The design emphasizes Authorization Independence to ensure robustness and ease of maintenance."
+  }
+}
