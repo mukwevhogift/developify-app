@@ -9,8 +9,11 @@ const RoleGuard = ({ children }: { children: ReactNode }) => {
   const { user, isUserLoading } = useUser();
   const router = useRouter();
   const pathname = usePathname();
-  const role = (user?.stsTokenManager?.claims as { role?: string })?.role;
   
+  const claims = (user?.stsTokenManager?.claims as { role?: string; status?: string });
+  const role = claims?.role;
+  const status = claims?.status;
+
   useEffect(() => {
     if (isUserLoading) {
       return; // Wait for user to be loaded
@@ -20,16 +23,40 @@ const RoleGuard = ({ children }: { children: ReactNode }) => {
       router.push('/login');
       return;
     }
-
-    // This is a simplified check. A real app might need more complex logic.
-    if (role === 'investor' && pathname.startsWith('/owner-onboarding')) {
+    
+    // Investor routes
+    if (role === 'investor' && (pathname.startsWith('/owner-onboarding') || pathname.startsWith('/owner'))) {
         router.push('/dashboard');
-    } else if (role === 'property_owner' && (pathname === '/dashboard' || pathname.startsWith('/properties'))) {
-        router.push('/owner-onboarding');
+    } 
+    // Property Owner routes
+    else if (role === 'property_owner') {
+        const isVerified = status === 'verified_owner';
+        
+        // If verified, but on onboarding, redirect to owner dashboard
+        if (isVerified && pathname.startsWith('/owner-onboarding')) {
+            router.push('/owner/dashboard');
+        } 
+        // If not verified, and trying to access owner areas, redirect to onboarding
+        else if (!isVerified && pathname.startsWith('/owner')) {
+            router.push('/owner-onboarding');
+        }
+        // If not verified and on investor pages, redirect to onboarding
+        else if (!isVerified && !pathname.startsWith('/owner-onboarding') && pathname !== '/settings') {
+             router.push('/owner-onboarding');
+        }
     }
-  }, [user, isUserLoading, router, pathname, role]);
+  }, [user, isUserLoading, router, pathname, role, status]);
 
   if (isUserLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  // Prevent flash of content before redirect
+  if (!user || isUserLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />

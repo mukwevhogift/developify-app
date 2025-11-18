@@ -12,6 +12,16 @@ service firebase.storage {
                     && request.resource.size < 10 * 1024 * 1024;
     }
 
+    // Property Media: Verified property owners can write to their own property folders.
+    // Files must be under 10MB.
+    match /property_media/{userId}/{propertyId}/{fileName} {
+      allow read: if true; // Media is public once uploaded.
+      allow write: if request.auth != null 
+                    && request.auth.uid == userId
+                    && request.resource.size < 10 * 1024 * 1024;
+                    // Future: check if user is a verified owner via custom claim or Firestore read
+    }
+
     // Default deny all other access
     match /{allPaths=**} {
       allow read, write: if false;

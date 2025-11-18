@@ -11,6 +11,7 @@ import {
   Settings,
   Rocket,
   UserCheck,
+  Building,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -25,20 +26,36 @@ import { useUser } from '@/firebase';
 import { Skeleton } from '../ui/skeleton';
 
 const navItems = [
+  // Investor Nav
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['investor'] },
   { href: '/properties', label: 'Properties', icon: Building2, roles: ['investor'] },
   { href: '/portfolio', label: 'Portfolio', icon: PieChart, roles: ['investor'] },
   { href: '/wallet', label: 'Wallet', icon: Wallet, roles: ['investor'] },
   { href: '/advisor', label: 'AI Advisor', icon: Sparkles, roles: ['investor'] },
-  { href: '/owner-onboarding', label: 'Get Verified', icon: UserCheck, roles: ['property_owner'] },
+  
+  // Property Owner Nav
+  { href: '/owner-onboarding', label: 'Get Verified', icon: UserCheck, roles: ['property_owner'], statuses: ['active', 'pending_kyc'] },
+  { href: '/owner/dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['property_owner'], statuses: ['verified_owner'] },
+  { href: '/owner/properties', label: 'My Properties', icon: Building, roles: ['property_owner'], statuses: ['verified_owner'] },
 ];
 
 export default function AppSidebar() {
   const pathname = usePathname();
   const { user, isUserLoading } = useUser();
-  const userRole = (user?.stsTokenManager?.claims as { role?: string })?.role;
+  
+  const claims = (user?.stsTokenManager?.claims as { role?: string; status?: string });
+  const userRole = claims?.role;
+  const userStatus = claims?.status;
 
-  const filteredNavItems = navItems.filter(item => userRole && item.roles.includes(userRole));
+  const filteredNavItems = navItems.filter(item => {
+    if (!userRole || !item.roles.includes(userRole)) {
+      return false;
+    }
+    if (item.statuses && userStatus && !item.statuses.includes(userStatus)) {
+      return false;
+    }
+    return true;
+  });
 
   return (
     <Sidebar>

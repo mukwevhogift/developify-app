@@ -29,11 +29,13 @@
         },
         "role": {
           "type": "string",
-          "description": "The user's role (investor or property_owner)."
+          "description": "The user's role (investor or property_owner).",
+          "enum": ["investor", "property_owner"]
         },
         "status": {
           "type": "string",
-          "description": "The user's account status (active or pending)."
+          "description": "The user's account status.",
+          "enum": ["active", "pending_kyc", "verified_owner", "rejected"]
         },
         "kycVerified": {
           "type": "boolean",
@@ -54,6 +56,110 @@
         "kycVerified",
         "createdAt"
       ]
+    },
+    "Property": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Property",
+      "type": "object",
+      "description": "Represents a property listing on the Developify platform.",
+      "properties": {
+        "ownerId": {
+          "type": "string",
+          "description": "The UID of the user who owns this property."
+        },
+        "title": {
+          "type": "string",
+          "description": "The title of the property listing."
+        },
+        "description": {
+          "type": "string",
+          "description": "A detailed description of the property."
+        },
+        "location": {
+          "type": "string",
+          "description": "The physical address or location of the property."
+        },
+        "targetAmount": {
+          "type": "number",
+          "description": "The total funding amount required for the property."
+        },
+        "raisedAmount": {
+          "type": "number",
+          "description": "The amount of funding raised so far."
+        },
+        "status": {
+          "type": "string",
+          "description": "The current status of the property listing.",
+          "enum": ["draft", "pending", "approved", "rejected"]
+        },
+        "images": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uri"
+          },
+          "description": "An array of URLs for property images stored in Firebase Storage."
+        },
+        "documents": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uri"
+          },
+          "description": "An array of URLs for property-related documents stored in Firebase Storage."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp of when the property was created.",
+          "format": "date-time"
+        },
+        "rejectedReason": {
+          "type": "string",
+          "description": "The reason why a property submission was rejected by an admin."
+        }
+      },
+      "required": [
+        "ownerId",
+        "title",
+        "description",
+        "location",
+        "targetAmount",
+        "raisedAmount",
+        "status",
+        "images",
+        "createdAt"
+      ]
+    },
+    "KycRequest": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "KYC Request",
+      "type": "object",
+      "description": "Represents a KYC verification request from a user.",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "The UID of the user submitting the KYC request."
+        },
+        "documentUrls": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uri"
+          },
+          "description": "An array of URLs for the uploaded KYC documents."
+        },
+        "status": {
+          "type": "string",
+          "description": "The status of the KYC request.",
+          "enum": ["pending", "approved", "rejected"]
+        },
+        "submittedAt": {
+          "type": "string",
+          "description": "Timestamp of when the request was submitted.",
+          "format": "date-time"
+        }
+      },
+      "required": ["userId", "documentUrls", "status", "submittedAt"]
     }
   },
   "auth": {
@@ -69,34 +175,32 @@
         "definition": {
           "entityName": "User",
           "schema": {
-            "$ref": "#/backend/entities/User"
+            "$ref": "#/entities/User"
           },
-          "description": "Stores user profile information.  Includes 'uid' to enforce path-based ownership. The 'userId' parameter must match the authenticated user's UID.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The Firebase Authentication UID of the user."
-            }
-          ]
+          "description": "Stores user profile information. Includes 'uid' to enforce path-based ownership. The 'userId' parameter must match the authenticated user's UID."
         }
       },
       {
-        "path": "/roles_admin/{userId}",
+        "path": "/properties/{propertyId}",
         "definition": {
-          "entityName": "role_admin",
+          "entityName": "Property",
           "schema": {
-            "$ref": "#/backend/entities/User"
+            "$ref": "#/entities/Property"
           },
-          "description": "Marks the document of an admin user. The existence of this document grants admin privileges.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The Firebase Authentication UID of the admin user."
-            }
-          ]
+          "description": "Stores property listings. Security rules enforce ownership and status-based read access."
+        }
+      },
+      {
+        "path": "/kyc_requests/{requestId}",
+        "definition": {
+          "entityName": "KycRequest",
+          "schema": {
+            "$ref": "#/entities/KycRequest"
+          },
+          "description": "Stores KYC verification submissions from property owners."
         }
       }
     ],
-    "reasoning": "This design prioritizes security and scalability for the Developify application. User data is stored in a dedicated collection (`/users/{userId}`), ensuring path-based ownership and straightforward security rules.  The `users` collection stores user profile information.  This approach simplifies security rules, allowing users to only read/write their own documents. This structure avoids any `get()` calls in rules, improving performance and security. This setup directly supports the QAP for user data by isolating it within the `/users/{userId}` path, preventing unauthorized access to other user profiles. The design emphasizes Authorization Independence to ensure robustness and ease of maintenance."
+    "reasoning": "This design prioritizes security and scalability for the Developify application. User data is stored in a dedicated collection (`/users/{userId}`), ensuring path-based ownership. The `properties` collection is secured to allow owners to manage their own listings, while public read access is restricted to 'approved' properties. The `kyc_requests` collection is write-only for users, with admin read/update access handled separately. This structure avoids `get()` calls in rules where possible, improving performance and security."
   }
 }

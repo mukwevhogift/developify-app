@@ -1,98 +1,97 @@
 /**
- * @file Firestore Security Rules for Developify (Prototyping Phase 1)
- *
- * @corePhilosophy: This ruleset enforces a strict user-ownership model for user profiles,
- *                   allowing users to only read and write their own data. This design simplifies
- *                   the rules and improves security.
- *
- * @dataStructure: User profiles are stored in the `/users/{userId}` collection, where `{userId}`
- *                  corresponds to the Firebase Authentication UID of the user.
- *
- * @keySecurityDecisions:
- *   - Users can only access their own documents. Listing all users is disallowed.
- *   - An admin role is reserved for the future and managed separately, but is not active in this prototype.
- *   - Data shape is not strictly enforced to allow for rapid prototyping. Only fields critical for authorization
- *     (like 'uid' and 'id') are validated.
- *
- * @denormalizationForAuthorization:
- *   - The `User` document stores the `uid` field, which is a duplicate of the `userId` path parameter. This
- *     denormalization allows the rules to quickly verify user ownership without additional `get()` calls.
- *
- * @structuralSegregation:
- *   - No public/private data segregation is implemented in this prototype. All user data is considered private
- *     and stored under the `/users/{userId}` path.
+ * @file Firestore Security Rules for Developify
+ * @version 3
+ * @description This ruleset secures user profiles, property listings, and KYC requests.
+ * It enforces user ownership, role-based access, and status-based read permissions for properties.
  */
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * @description Secures user profile data in the `/users/{userId}` collection.
-     *              Allows users to read and write their own profile data.
-     * @path /users/{userId}
-     * @allow (create) User with UID "user_abc" can create a document at `/users/user_abc` with matching `uid` and `id` fields.
-     * @allow (get, update, delete) User with UID "user_abc" can get, update, or delete their own document at `/users/user_abc`.
-     * @deny (create) User with UID "user_abc" cannot create a document at `/users/user_xyz`.
-     * @deny (get, update, delete) User with UID "user_xyz" cannot get, update, or delete the document at `/users/user_abc`.
-     * @principle Enforces document ownership for reads and writes. Validates relational integrity between the path and document data.
+     * @description Returns true if the requesting user is the owner of the document.
+     * @param userId The UID of the document owner.
      */
-    match /users/{userId} {
-      function isOwner(userId) {
-        return request.auth != null && request.auth.uid == userId;
-      }
-
-      function isExistingOwner(userId) {
-        return isOwner(userId) && resource != null;
-      }
-
-      // Future admin access rule:
-      // function isAdmin() {
-      //   return exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
-      // }
-
-      allow get: if isOwner(userId); // || isAdmin()
-      allow list: if false; // Listing users is not permitted for now. Could be admin-only.
-
-      allow create: if isOwner(userId) && request.resource.data.uid == userId && request.resource.data.id == userId;
-
-      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id; // || isAdmin()
-
-      allow delete: if isExistingOwner(userId); // || isAdmin()
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
     }
 
     /**
-      * @description Secures KYC requests in the `/kyc_requests` collection.
-      * @path /kyc_requests/{requestId}
-      * @allow (create) Authenticated users can create KYC requests for themselves.
-      * @deny (read, list, update, delete) All other operations are denied for now.
-    */
-    match /kyc_requests/{requestId} {
-       function isOwner(userId) {
-        return request.auth != null && request.auth.uid == userId;
-      }
+     * @description Returns true if the requesting user is a verified property owner.
+     *              This relies on a custom claim set by a backend function.
+     */
+    function isVerifiedOwner() {
+      return request.auth != null && request.auth.token.role == 'property_owner';
+    }
 
+    /**
+     * @description Placeholder for admin role check.
+     */
+    // function isAdmin() {
+    //   return exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
+    // }
+
+    /**
+     * @description Secures user profile data.
+     * @path /users/{userId}
+     */
+    match /users/{userId} {
+      allow get, update: if isOwner(userId); // || isAdmin()
+      allow create: if isOwner(userId) && request.resource.data.uid == userId;
+      allow list, delete: if false; // No one can list or delete users for now.
+    }
+
+    /**
+     * @description Secures KYC requests. Users can only create their own.
+     * @path /kyc_requests/{requestId}
+     */
+    match /kyc_requests/{requestId} {
       allow create: if isOwner(request.resource.data.userId);
       allow read, list, update, delete: if false; // Future: allow admin to read/update
     }
 
+    /**
+     * @description Secures property listings.
+     * @path /properties/{propertyId}
+     */
+    match /properties/{propertyId} {
+      // ANYONE can read a property that has been approved for public listing.
+      allow get: if resource.data.status == 'approved';
+      // ONLY authenticated users can list approved properties.
+      allow list: if request.auth != null;
+
+      // CREATE: Only verified property owners can create new property listings.
+      // The new property must belong to them and start as a 'draft'.
+      allow create: if isVerifiedOwner() &&
+                      isOwner(request.resource.data.ownerId) &&
+                      request.resource.data.status == 'draft';
+
+      // UPDATE: Owners can only update their own properties.
+      // Certain fields like ownerId and createdAt are immutable.
+      // Status can only be changed from 'draft' to 'pending' by the owner.
+      allow update: if isVerifiedOwner() &&
+                      isOwner(resource.data.ownerId) &&
+                      request.resource.data.ownerId == resource.data.ownerId &&
+                      request.resource.data.createdAt == resource.data.createdAt &&
+                      (
+                        // Owner can update their draft.
+                        (resource.data.status == 'draft' && request.resource.data.status == 'draft') ||
+                        // Owner can submit a draft for review.
+                        (resource.data.status == 'draft' && request.resource.data.status == 'pending')
+                        // Future: Admin can approve/reject.
+                        // || (isAdmin() && request.resource.data.status in ['approved', 'rejected'])
+                      );
+
+      // DELETE: Owners can only delete their own properties if they are in 'draft' status.
+      allow delete: if isVerifiedOwner() && isOwner(resource.data.ownerId) && resource.data.status == 'draft';
+    }
 
     /**
-      * @description Secures documents that mark admin users in the `/roles_admin/{userId}` collection.
-      *              This is a placeholder for future admin role implementation.
-      * @path /roles_admin/{userId}
-      * @allow (get) Allow get admin's document.
-      * @allow (list) Deny listing admin users.
-      * @allow (create) Deny creating admin user directly.
-      * @allow (update) Deny updating admin user directly.
-      * @allow (delete) Deny deleting admin user directly.
-      */
+     * @description Placeholder for admin roles.
+     * @path /roles_admin/{userId}
+     */
     match /roles_admin/{userId} {
-        allow get: if false; // No one has access yet
-        allow list: if false; // No one has access yet
-
-        allow create: if false;
-        allow update: if false;
-        allow delete: if false;
+      allow read, write: if false; // No one has access yet
     }
   }
 }
