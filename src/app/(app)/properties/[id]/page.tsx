@@ -1,3 +1,6 @@
+'use client'
+
+import { useState } from "react"
 import { properties } from "@/lib/data"
 import { notFound } from "next/navigation"
 import Image from "next/image"
@@ -9,8 +12,10 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Building, DollarSign, Target, TrendingUp } from "lucide-react"
+import { VerificationDialog } from "@/components/properties/verification-dialog"
 
 export default function PropertyDetailsPage({ params }: { params: { id: string } }) {
+  const [isVerificationOpen, setVerificationOpen] = useState(false)
   const property = properties.find(p => p.id === params.id)
 
   if (!property) {
@@ -21,7 +26,14 @@ export default function PropertyDetailsPage({ params }: { params: { id: string }
   const image = PlaceHolderImages.find(p => p.id === property.images[0])
   const galleryImages = property.images.map(id => PlaceHolderImages.find(p => p.id === id)).filter(Boolean)
 
+  const handleInvestClick = () => {
+    // In a real app, you'd check if the user is already verified.
+    // For this prototype, we'll always show the verification dialog.
+    setVerificationOpen(true)
+  }
+
   return (
+    <>
     <div className="space-y-8">
       <div>
         <h1 className="font-headline text-4xl font-bold tracking-tight">{property.name}</h1>
@@ -96,12 +108,14 @@ export default function PropertyDetailsPage({ params }: { params: { id: string }
                             <Input id="investment-amount" type="number" placeholder="90000" className="pl-8" />
                         </div>
                     </div>
-                    <Button className="w-full font-bold" size="lg">Invest</Button>
+                    <Button className="w-full font-bold" size="lg" onClick={handleInvestClick}>Invest</Button>
                     <p className="text-xs text-muted-foreground text-center">Minimum investment: R20,000</p>
                 </CardContent>
             </Card>
         </div>
       </div>
     </div>
+    <VerificationDialog open={isVerificationOpen} onOpenChange={setVerificationOpen} />
+    </>
   )
 }
