@@ -1,3 +1,46 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "user-avatar-1",
+      "description": "User avatar",
+      "imageUrl": "https://images.unsplash.com/photo-1531123414780-f74242c2b052?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8cGVyc29uJTIwcG9ydHJhaXR8ZW58MHx8fHwxNzYzMzgzMDcwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "person portrait"
+    },
+    {
+      "id": "property-1",
+      "description": "Modern villa with a pool",
+      "imageUrl": "https://images.unsplash.com/photo-1613490493576-7fde63acd811?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBob3VzZXxlbnwwfHx8fDE3NjM0MjUzNDB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "modern house"
+    },
+    {
+      "id": "property-2",
+      "description": "Skyscraper apartment",
+      "imageUrl": "https://images.unsplash.com/photo-1751469020033-7ee3844f2170?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxjaXR5JTIwYXBhcnRtZW50fGVufDB8fHx8MTc2MzQ1Mjg0N3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "city apartment"
+    },
+    {
+      "id": "property-3",
+      "description": "Suburban family home",
+      "imageUrl": "https://images.unsplash.com/photo-1628624747186-a941c476b7ef?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxzdWJ1cmJhbiUyMGhvdXNlfGVufDB8fHx8MTc2MzQzMjQwNHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "suburban house"
+    },
+    {
+      "id": "property-4",
+      "description": "Luxury downtown condo",
+      "imageUrl": "https://images.unsplash.com/photo-1741764014072-68953e93cd48?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxsdXh1cnklMjBjb25kb3xlbnwwfHx8fDE3NjM0Mzc1NTN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "luxury condo"
+    },
+    {
+      "id": "property-5",
+      "description": "Beachfront property",
+      "imageUrl": "https://images.unsplash.com/photo-1517541866997-ea18e32ea9e9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxiZWFjaCUyMGhvdXNlfGVufDB8fHx8MTc2MzM4OTI0MHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "beach house"
+    },
+    {
+      "id": "property-6",
+      "description": "Commercial retail space",
+      "imageUrl": "https://images.unsplash.com/photo-1763194181024-35b5241f6bdc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxyZXRhaWwlMjBzcGFjZXxlbnwwfHx8fDE3NjM0NTk1NzB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "retail space"
+    }
+  ]
 }
