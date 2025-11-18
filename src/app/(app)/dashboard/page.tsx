@@ -31,17 +31,17 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart"
 
-const walletBalance = 175000.00;
-const portfolioValue = 175000.00;
+const walletBalance = 3200000.00;
+const portfolioValue = 3200000.00;
 const portfolioGrowth = 15.2;
 
 const portfolioPerformanceData = [
-  { month: 'Jan', value: 150000 },
-  { month: 'Feb', value: 155000 },
-  { month: 'Mar', value: 162000 },
-  { month: 'Apr', value: 175000 },
-  { month: 'May', value: 181000 },
-  { month: 'Jun', value: 175000 },
+  { month: 'Jan', value: 2800000 },
+  { month: 'Feb', value: 2900000 },
+  { month: 'Mar', value: 3000000 },
+  { month: 'Apr', value: 3200000 },
+  { month: 'May', value: 3300000 },
+  { month: 'Jun', value: 3200000 },
 ]
 const chartConfig = {
   value: {
@@ -66,7 +66,7 @@ export default function DashboardPage() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">${walletBalance.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
+            <div className="text-3xl font-bold">R{walletBalance.toLocaleString('en-ZA', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
             <p className="text-xs text-muted-foreground">
               Available for new investments
             </p>
@@ -82,7 +82,7 @@ export default function DashboardPage() {
             <PieChart className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">${portfolioValue.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
+            <div className="text-3xl font-bold">R{portfolioValue.toLocaleString('en-ZA', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
             <p className="text-xs text-muted-foreground">
               <span className="text-green-400">+{portfolioGrowth}%</span> since last month
             </p>
@@ -168,7 +168,7 @@ export default function DashboardPage() {
                     <TableCell className="hidden font-medium text-green-400 md:table-cell">{prop.roi}%</TableCell>
                     <TableCell>
                         <div className="flex flex-col">
-                            <span className="text-sm font-medium">${prop.currentAmount.toLocaleString()}</span>
+                            <span className="text-sm font-medium">R{prop.currentAmount.toLocaleString()}</span>
                             <Progress value={fundingPercentage} className="mt-1 h-2 w-24" />
                         </div>
                     </TableCell>

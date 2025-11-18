@@ -64,7 +64,7 @@ export default function PropertyDetailsPage({ params }: { params: { id: string }
                     </div>
                     <div className="flex items-center justify-between">
                         <span className="text-muted-foreground flex items-center gap-2"><DollarSign className="h-4 w-4" /> Target Amount</span>
-                        <span className="font-bold">${property.targetAmount.toLocaleString()}</span>
+                        <span className="font-bold">R{property.targetAmount.toLocaleString()}</span>
                     </div>
                      <div className="flex items-center justify-between">
                         <span className="text-muted-foreground flex items-center gap-2"><Building className="h-4 w-4" /> Developer</span>
@@ -85,19 +85,19 @@ export default function PropertyDetailsPage({ params }: { params: { id: string }
                     <div>
                         <div className="mb-2 flex justify-between text-sm">
                             <span>Funding Progress</span>
-                            <span className="font-medium">${property.currentAmount.toLocaleString()} / ${property.targetAmount.toLocaleString()}</span>
+                            <span className="font-medium">R{property.currentAmount.toLocaleString()} / R{property.targetAmount.toLocaleString()}</span>
                         </div>
                         <Progress value={fundingPercentage} className="h-3" />
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="investment-amount">Investment Amount</Label>
                         <div className="relative">
-                            <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                            <Input id="investment-amount" type="number" placeholder="5000" className="pl-10" />
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">R</span>
+                            <Input id="investment-amount" type="number" placeholder="90000" className="pl-8" />
                         </div>
                     </div>
                     <Button className="w-full font-bold" size="lg">Invest</Button>
-                    <p className="text-xs text-muted-foreground text-center">Minimum investment: $1,000</p>
+                    <p className="text-xs text-muted-foreground text-center">Minimum investment: R20,000</p>
                 </CardContent>
             </Card>
         </div>

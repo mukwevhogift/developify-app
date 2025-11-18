@@ -8,7 +8,7 @@ import { transactions } from "@/lib/data"
 import { Badge } from "@/components/ui/badge"
 import { ArrowDownLeft, ArrowUpRight } from "lucide-react"
 
-const walletBalance = 175000.00;
+const walletBalance = 3200000.00;
 
 export default function WalletPage() {
   return (
@@ -24,7 +24,7 @@ export default function WalletPage() {
               <CardTitle>Current Balance</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-4xl font-bold">${walletBalance.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
+              <p className="text-4xl font-bold">R{walletBalance.toLocaleString('en-ZA', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
             </CardContent>
           </Card>
 
@@ -42,7 +42,7 @@ export default function WalletPage() {
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="add-amount">Amount</Label>
-                    <Input id="add-amount" type="number" placeholder="5000" />
+                    <Input id="add-amount" type="number" placeholder="100000" />
                   </div>
                   <Button className="w-full font-bold">Add Funds</Button>
                 </CardContent>
@@ -57,7 +57,7 @@ export default function WalletPage() {
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="withdraw-amount">Amount</Label>
-                    <Input id="withdraw-amount" type="number" placeholder="1000" />
+                    <Input id="withdraw-amount" type="number" placeholder="20000" />
                   </div>
                   <Button className="w-full font-bold">Withdraw</Button>
                 </CardContent>
@@ -100,7 +100,7 @@ export default function WalletPage() {
                         </Badge>
                       </TableCell>
                       <TableCell className={`text-right font-medium ${tx.amount > 0 ? 'text-green-400' : 'text-foreground'}`}>
-                        {tx.amount > 0 ? '+' : ''}${Math.abs(tx.amount).toLocaleString()}
+                        {tx.amount > 0 ? '+' : ''}R{Math.abs(tx.amount).toLocaleString()}
                       </TableCell>
                     </TableRow>
                   ))}

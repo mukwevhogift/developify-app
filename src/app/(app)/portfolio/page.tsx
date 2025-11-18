@@ -44,7 +44,7 @@ const PortfolioTable = ({ investmentsToShow }: { investmentsToShow: Investment[]
                             </div>
                         </div>
                     </TableCell>
-                    <TableCell className="font-medium">${investment.amount.toLocaleString()}</TableCell>
+                    <TableCell className="font-medium">R{investment.amount.toLocaleString()}</TableCell>
                     <TableCell className="text-muted-foreground">{investment.date}</TableCell>
                     <TableCell>
                         <Badge variant={investment.status === 'Active' ? 'default' : 'secondary'} className={
