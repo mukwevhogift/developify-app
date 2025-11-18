@@ -2,8 +2,14 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Award, BarChart, ShieldCheck, Wallet } from 'lucide-react'
+import { Award, BarChart, Play, ShieldCheck, Wallet } from 'lucide-react'
 import CountUp from 'react-countup'
+import {
+  Dialog,
+  DialogContent,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import React from 'react'
 
 const StatCard = ({ value, label, icon: Icon }: { value: number, label: string, icon: React.ElementType }) => (
   <motion.div
@@ -76,17 +82,34 @@ export default function AboutSection() {
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
             viewport={{ once: true, amount: 0.3 }}
         >
-            <div className="aspect-w-9 aspect-h-16 h-full w-full overflow-hidden rounded-2xl shadow-2xl">
-                <video
-                    className="h-full w-full object-cover"
-                    src="/Developify__Investing_Reimagined.mp4"
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    poster="https://via.placeholder.com/1280x720.png?text=Developify%20Explainer"
-                />
-            </div>
+          <Dialog>
+            <DialogTrigger asChild>
+              <div className="group aspect-w-9 aspect-h-16 relative h-full w-full cursor-pointer overflow-hidden rounded-2xl shadow-2xl">
+                  <video
+                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      src="/Developify__Investing_Reimagined.mp4"
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      poster="https://via.placeholder.com/1280x720.png?text=Developify%20Explainer"
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/30 transition-opacity group-hover:bg-black/50">
+                    <div className="rounded-full bg-white/20 p-4 backdrop-blur-sm transition-all group-hover:scale-110">
+                      <Play className="h-8 w-8 text-white" />
+                    </div>
+                  </div>
+              </div>
+            </DialogTrigger>
+            <DialogContent className="max-w-4xl p-0 border-0 bg-transparent">
+              <video
+                  className="h-full w-full rounded-lg"
+                  src="/Developify__Investing_Reimagined.mp4"
+                  controls
+                  autoPlay
+              />
+            </DialogContent>
+          </Dialog>
         </motion.div>
       </div>
       <div className="relative h-px w-full bg-gradient-to-r from-transparent via-teal-500/50 to-transparent mt-20"></div>
