@@ -30,6 +30,7 @@ import { useAuth } from '@/contexts/auth-context';
 const allNavItems = [
   // Investor Nav
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, role: 'investor' },
+  { href: '/properties', label: 'Explore Properties', icon: Building2, role: 'investor' },
   { href: '/portfolio', label: 'Portfolio', icon: PieChart, role: 'investor' },
   { href: '/wallet', label: 'Wallet', icon: Wallet, role: 'investor' },
   { href: '/advisor', label: 'AI Advisor', icon: Sparkles, role: 'investor' },
